@@ -5,7 +5,7 @@
 - We are a non-profit organization promotes the NEM/Symbol blockchain tech.
 - Our website: https://nemtus.com/
 
-### 🌈 Contribute guidlines
+### 🌈 Contribution
 
 Any contribution is welcome, for example ...
 
