@@ -18,7 +18,7 @@ We develop and maintain open source SDKs related to NEM/Symbol.
 We plan various community events and create websites and web apps for those events.
 
 - Hackathon
-  - Event Website([2023 GitHub](https://github.com/nemtus/hackathon-lp-2023), [2023 Website](https://hackathon-2023.nemtus.com/))
+  - Event Website([GitHub](https://github.com/nemtus/hackathon-lp), [Website](https://hackathon.nemtus.com/), [2024 GitHub](https://github.com/nemtus/hackathon-lp-2024), [2024 Website](https://hackathon-2024.nemtus.com/), [2023 GitHub](https://github.com/nemtus/hackathon-lp-2023), [2023 Website](https://hackathon-2023.nemtus.com/))
   - Event Management Web App with Symbol Blockchain([GitHub](https://github.com/nemtus/hackathon), [Web App](https://nemtus-hackathon.web.app/))
 
 - Tech Fest
