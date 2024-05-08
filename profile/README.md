@@ -27,3 +27,8 @@ We plan various community events and create websites and web apps for those even
 We also publish tech blog articles.
 
 - [Tech Blog(Zenn)](https://zenn.dev/nemtus), [GitHub](https://github.com/nemtus/tech-blog)
+
+We also publish techbooks.
+
+- [Quick Learning Symbol for JavaScript](https://techbookfest.org/product/1iLNyYUUpfvh2EsB8qj0U0), [GitHub](https://github.com/YasunoriMATSUOKA/tbf14-qls/)
+- [Quick Learning Symbol for C#](https://techbookfest.org/product/rMKkMgBq9ZadJSecDytR9k), [GitHub](https://github.com/YasunoriMATSUOKA/tbf14-qls-cs/)
