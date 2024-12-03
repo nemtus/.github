@@ -32,3 +32,4 @@ We also publish techbooks.
 
 - [Quick Learning Symbol for JavaScript](https://techbookfest.org/product/1iLNyYUUpfvh2EsB8qj0U0), [GitHub](https://github.com/YasunoriMATSUOKA/tbf14-qls/)
 - [Quick Learning Symbol for C#](https://techbookfest.org/product/rMKkMgBq9ZadJSecDytR9k), [GitHub](https://github.com/YasunoriMATSUOKA/tbf14-qls-cs/)
+- [Quick Learning Symbol for PHP](https://techbookfest.org/product/f1xWii4u1BjUY6KcE3Bt6B), [GitHub](https://github.com/nemtus/tbf17-qls-php/)
