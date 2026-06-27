@@ -102,3 +102,6 @@ dist
 
 # TernJS port file
 .tern-port
+
+# 1Password CLI shell plugins (local tooling state)
+.op/
