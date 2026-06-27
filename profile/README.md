@@ -1,35 +1,106 @@
-## Hi there 👋
+<div align="center">
 
-### 🙋‍♀️ NEMTUS
+<img src="https://nemtus.com/wp-content/uploads/2020/11/header_nemtus.png" alt="NEMTUS" width="360" />
 
-- We are a non-profit organization promotes the NEM/Symbol blockchain tech.
-- Our website: https://nemtus.com/
+# NEMTUS
 
-### 👩‍💻 Our activities
+### Building the NEM/Symbol developer ecosystem
 
-We develop and maintain open source SDKs related to NEM/Symbol.
+NEMTUS is a Japanese non-profit advancing the **NEM/Symbol** blockchain — we build and maintain
+open-source SDKs and node images, run the annual HACK+ hackathon, and publish learning material
+so anyone can build on Symbol. Everything we make is open source and free to use.
 
-- REST API client of Symbol Blockchain for TypeScript
-  - @nemtus/symbol-sdk-openapi-generator-typescript-axios([GitHub](https://github.com/nemtus/symbol-sdk-openapi-generator-typescript-axios), [npm package](https://www.npmjs.com/package/@nemtus/symbol-sdk-openapi-generator-typescript-axios))
-  - @nemtus/symbol-sdk-openapi-generator-typescript-fetch([GitHub](https://github.com/nemtus/symbol-sdk-openapi-generator-typescript-fetch), [npm package](https://www.npmjs.com/package/@nemtus/symbol-sdk-openapi-generator-typescript-fetch))
-- SDK of Symbol Blockchain for TypeScript ... Still experimental and not up to date with the latest versions at this time
-  - @nemtus/symbol-sdk-typescript([GitHub](https://github.com/nemtus/symbol), [npm package](https://www.npmjs.com/package/@nemtus/symbol-sdk-typescript))
+[![Sponsor](https://img.shields.io/badge/Sponsor-NEMTUS-ea4aaa?logo=githubsponsors)](https://github.com/sponsors/nemtus)
+[![Website](https://img.shields.io/badge/Website-nemtus.com-2ea44f)](https://nemtus.com/)
+[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 
-We plan various community events and create websites and web apps for those events.
+**[💖 Sponsor](https://github.com/sponsors/nemtus) · [🌐 Website](https://nemtus.com/) · [🐦 X](https://x.com/nemtusofficial) · [💬 Discord](https://discord.gg/eAucJKNs3R)**
 
-- Hackathon
-  - Event Website([GitHub](https://github.com/nemtus/hackathon-lp), [Website](https://hackathon.nemtus.com/), [2025 GitHub](https://github.com/nemtus/hackathon-lp-2025), [2025 Website](https://hackathon-2025.nemtus.com/), [2024 GitHub](https://github.com/nemtus/hackathon-lp-2024), [2024 Website](https://hackathon-2024.nemtus.com/), [2023 GitHub](https://github.com/nemtus/hackathon-lp-2023), [2023 Website](https://hackathon-2023.nemtus.com/))
-  - Event Management Web App with Symbol Blockchain([GitHub](https://github.com/nemtus/hackathon), [Web App](https://nemtus-hackathon.web.app/))
+</div>
 
-- Tech Fest
-  - Symbol payment-enabled online shopping web app for technology festival events only([GitHub](https://github.com/nemtus/symbol-fest-market), [Web App](https://symbol-fest-market.nemtus.com/))
+---
 
-We also publish tech blog articles.
+## 🎯 Mission
 
-- [Tech Blog(Zenn)](https://zenn.dev/nemtus), [GitHub](https://github.com/nemtus/tech-blog)
+The NEM/Symbol blockchain is a stable, enterprise-grade platform with native multi-signature,
+custom on-chain assets (mosaics), and a participation-rewarding PoS+ consensus. NEMTUS exists to
+**lower the barrier to building on it** — through reliable open-source tooling, self-hostable node
+images, hands-on events, and a welcoming community.
 
-We also publish techbooks.
+## 🧰 Build on Symbol
 
-- [Quick Learning Symbol for JavaScript](https://techbookfest.org/product/1iLNyYUUpfvh2EsB8qj0U0), [GitHub](https://github.com/YasunoriMATSUOKA/tbf14-qls/)
-- [Quick Learning Symbol for C#](https://techbookfest.org/product/rMKkMgBq9ZadJSecDytR9k), [GitHub](https://github.com/YasunoriMATSUOKA/tbf14-qls-cs/)
-- [Quick Learning Symbol for PHP](https://techbookfest.org/product/f1xWii4u1BjUY6KcE3Bt6B), [GitHub](https://github.com/nemtus/tbf17-qls-php/)
+TypeScript-first libraries for building Symbol apps:
+
+| Package | What it is | Links |
+| --- | --- | --- |
+| **@nemtus/symbol-sdk** | Recommended JavaScript/TypeScript SDK for Symbol | [npm](https://www.npmjs.com/package/@nemtus/symbol-sdk) ![npm](https://img.shields.io/npm/v/@nemtus/symbol-sdk) · [GitHub](https://github.com/nemtus/symbol) |
+| **@nemtus/symbol-openapi** | OpenAPI specification of the Symbol (catapult) REST API | [npm](https://www.npmjs.com/package/@nemtus/symbol-openapi) ![npm](https://img.shields.io/npm/v/@nemtus/symbol-openapi) · [GitHub](https://github.com/nemtus/symbol) |
+| **@nemtus/symbol-sdk-openapi-generator-typescript-axios** | Typed REST client generated for Axios | [npm](https://www.npmjs.com/package/@nemtus/symbol-sdk-openapi-generator-typescript-axios) ![npm](https://img.shields.io/npm/v/@nemtus/symbol-sdk-openapi-generator-typescript-axios) · [GitHub](https://github.com/nemtus/symbol-sdk-openapi-generator-typescript-axios) |
+| **@nemtus/symbol-sdk-openapi-generator-typescript-fetch** | Typed REST client generated for Fetch | [npm](https://www.npmjs.com/package/@nemtus/symbol-sdk-openapi-generator-typescript-fetch) ![npm](https://img.shields.io/npm/v/@nemtus/symbol-sdk-openapi-generator-typescript-fetch) · [GitHub](https://github.com/nemtus/symbol-sdk-openapi-generator-typescript-fetch) |
+
+> ℹ️ `@nemtus/symbol-sdk-typescript` is **deprecated** — please migrate to **@nemtus/symbol-sdk**.
+
+## 🐳 Run a Symbol node
+
+Reproducible, self-hostable container images of the Symbol node stack (built from canonical
+upstream sources, with SBOM + SLSA provenance):
+
+| Image | What it is | Pull |
+| --- | --- | --- |
+| **ghcr.io/nemtus/catapult-server** | Symbol `catapult-server` node (server, broker, recovery, tools) | `docker pull ghcr.io/nemtus/catapult-server:latest` · [packages](https://github.com/nemtus/symbol/pkgs/container/catapult-server) |
+| **ghcr.io/nemtus/symbol-rest** | Symbol REST gateway (`symbol-api-rest`) | `docker pull ghcr.io/nemtus/symbol-rest:latest` · [packages](https://github.com/nemtus/symbol/pkgs/container/symbol-rest) |
+
+## 🏆 NEMTUS Hackathon — HACK+
+
+Our flagship annual hackathon for builders on Symbol, held every year since 2022.
+
+- **Hackathon app** — registration & event management, built on Symbol and actively maintained:
+  **[Open app](https://nemtus-hackathon.web.app/)** · [GitHub](https://github.com/nemtus/hackathon)
+- **All editions** — [overview site](https://hackathon.nemtus.com/) ([repo](https://github.com/nemtus/hackathon-lp)):
+
+  | Edition | Website | Source |
+  | --- | --- | --- |
+  | HACK+2026 | [hackathon-2026.nemtus.com](https://hackathon-2026.nemtus.com/) | — |
+  | HACK+2025 | [hackathon-2025.nemtus.com](https://hackathon-2025.nemtus.com/) | [GitHub](https://github.com/nemtus/hackathon-lp-2025) |
+  | HACK+2024 | [hackathon-2024.nemtus.com](https://hackathon-2024.nemtus.com/) | [GitHub](https://github.com/nemtus/hackathon-lp-2024) |
+  | HACK+2023 | [hackathon-2023.nemtus.com](https://hackathon-2023.nemtus.com/) | [GitHub](https://github.com/nemtus/hackathon-lp-2023) |
+  | HACK+2022 | [hackathon-2022.nemtus.com](https://hackathon-2022.nemtus.com/) | — |
+
+## 🎓 Learn Symbol
+
+- **"Quick Learning Symbol" techbooks** —
+  [JavaScript](https://techbookfest.org/product/1iLNyYUUpfvh2EsB8qj0U0) ·
+  [C#](https://techbookfest.org/product/rMKkMgBq9ZadJSecDytR9k) ·
+  [PHP](https://techbookfest.org/product/f1xWii4u1BjUY6KcE3Bt6B)
+- **Tech blog** — articles & tutorials on [Zenn](https://zenn.dev/nemtus)
+  ([source](https://github.com/nemtus/tech-blog))
+
+## 🌐 Community
+
+- **XYMPOSIUM** — a community conference for the Symbol ecosystem
+  ([GitHub](https://github.com/nemtus/symbol-community-xymposium-2024))
+- Follow along and join in on [X](https://x.com/nemtusofficial) and [Discord](https://discord.gg/eAucJKNs3R)
+
+## 🤝 Get involved
+
+Contributors of every kind are welcome — code, docs, translations, and event help.
+
+- ⭐ Star and watch the repos you use (start with [@nemtus/symbol-sdk](https://github.com/nemtus/symbol))
+- 🐛 Open issues and pull requests — bug reports and fixes are all valued
+- 🌍 Help translate docs and learning material into more languages
+- 💬 Say hi on [X](https://x.com/nemtusofficial) / [Discord](https://discord.gg/eAucJKNs3R) and join an upcoming HACK+ event
+
+## 💖 Support NEMTUS
+
+NEMTUS is a non-profit; sponsorship directly funds open-source maintenance (SDKs and node images),
+the HACK+ hackathon, and free learning material for the whole Symbol ecosystem.
+
+**[→ Become a sponsor](https://github.com/sponsors/nemtus)**
+
+---
+
+<div align="center">
+
+[Website](https://nemtus.com/) · [GitHub](https://github.com/nemtus) · [Zenn](https://zenn.dev/nemtus) · [Sponsor](https://github.com/sponsors/nemtus)
+
+</div>
