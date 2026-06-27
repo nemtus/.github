@@ -1,0 +1,50 @@
+{
+  "folders": [
+    { "path": ".", "name": "org-meta (.github)" },
+    { "path": "../symbol" }
+  ],
+  "settings": {
+    // Watcher excludes: most important here since this does NOT honor .gitignore
+    // (keeps catapult's _build and node_modules from overloading the file watcher).
+    "files.watcherExclude": {
+      "**/.git/**": true,
+      "**/node_modules/**": true,
+      "**/_build/**": true,
+      "**/_temp/**": true,
+      "**/dist/**": true,
+      "**/build/**": true,
+      "**/ts/**": true,
+      "**/__pycache__/**": true,
+      "**/*.egg-info/**": true,
+      "**/.pytest_cache/**": true,
+      "**/.mypy_cache/**": true,
+      "**/.ruff_cache/**": true,
+      "**/.venv/**": true,
+      "**/coverage/**": true,
+      "**/htmlcov/**": true
+    },
+    // Search excludes: keep generated artifacts out of search results (still shown in Explorer).
+    "search.exclude": {
+      "**/node_modules": true,
+      "**/_build": true,
+      "**/_temp": true,
+      "**/dist": true,
+      "**/build": true,
+      "**/ts": true,
+      "**/__pycache__": true,
+      "**/*.egg-info": true,
+      "**/.pytest_cache": true,
+      "**/.mypy_cache": true,
+      "**/.ruff_cache": true,
+      "**/.venv": true,
+      "**/coverage": true,
+      "**/htmlcov": true,
+      "**/package-lock.json": true
+    },
+    // Explorer hides only minimal noise (generated dirs stay visible): OS cruft and the 1Password secrets dir.
+    "files.exclude": {
+      "**/.DS_Store": true,
+      "**/.op": true
+    }
+  }
+}
