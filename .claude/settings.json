@@ -11,10 +11,10 @@
       "Bash(ls:*)",
       "Bash(find:*)",
       "Bash(rg:*)",
-      "Bash(gh pr view:*)",
-      "Bash(gh pr list:*)",
-      "Bash(gh pr diff:*)",
-      "Bash(gh repo view:*)",
+      "Bash(op plugin run -- gh pr view:*)",
+      "Bash(op plugin run -- gh pr list:*)",
+      "Bash(op plugin run -- gh pr diff:*)",
+      "Bash(op plugin run -- gh repo view:*)",
       "Edit(*.md)",
       "Edit(profile/*.md)",
       "Edit(*.yml)",
@@ -23,8 +23,8 @@
     "ask": [
       "Bash(git commit:*)",
       "Bash(git push:*)",
-      "Bash(gh pr create:*)",
-      "Bash(gh pr merge:*)",
+      "Bash(op plugin run -- gh pr create:*)",
+      "Bash(op plugin run -- gh pr merge:*)",
       "WebFetch"
     ],
     "deny": [
