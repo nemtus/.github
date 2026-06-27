@@ -29,7 +29,7 @@ images, hands-on events, and a welcoming community.
 
 ## 🧰 Build on Symbol
 
-TypeScript-first libraries for building Symbol apps:
+Libraries for building Symbol apps, in JavaScript/TypeScript and Python:
 
 | Package | What it is | Links |
 | --- | --- | --- |
@@ -37,6 +37,8 @@ TypeScript-first libraries for building Symbol apps:
 | **@nemtus/symbol-openapi** | OpenAPI specification of the Symbol (catapult) REST API | [npm](https://www.npmjs.com/package/@nemtus/symbol-openapi) ![npm](https://img.shields.io/npm/v/@nemtus/symbol-openapi) · [GitHub](https://github.com/nemtus/symbol) |
 | **@nemtus/symbol-sdk-openapi-generator-typescript-axios** | Typed REST client generated for Axios | [npm](https://www.npmjs.com/package/@nemtus/symbol-sdk-openapi-generator-typescript-axios) ![npm](https://img.shields.io/npm/v/@nemtus/symbol-sdk-openapi-generator-typescript-axios) · [GitHub](https://github.com/nemtus/symbol-sdk-openapi-generator-typescript-axios) |
 | **@nemtus/symbol-sdk-openapi-generator-typescript-fetch** | Typed REST client generated for Fetch | [npm](https://www.npmjs.com/package/@nemtus/symbol-sdk-openapi-generator-typescript-fetch) ![npm](https://img.shields.io/npm/v/@nemtus/symbol-sdk-openapi-generator-typescript-fetch) · [GitHub](https://github.com/nemtus/symbol-sdk-openapi-generator-typescript-fetch) |
+| **nemtus-symbol-sdk** | Symbol Python SDK (import module: `symbolchain`) | [PyPI](https://pypi.org/project/nemtus-symbol-sdk/) ![PyPI](https://img.shields.io/pypi/v/nemtus-symbol-sdk) · [GitHub](https://github.com/nemtus/symbol/tree/dev/sdk/python) |
+| **nemtus-catparser** | Symbol catbuffer schema parser (Python) | [PyPI](https://pypi.org/project/nemtus-catparser/) ![PyPI](https://img.shields.io/pypi/v/nemtus-catparser) · [GitHub](https://github.com/nemtus/symbol/tree/dev/catbuffer/parser) |
 
 > ℹ️ `@nemtus/symbol-sdk-typescript` is **deprecated** — please migrate to **@nemtus/symbol-sdk**.
 
