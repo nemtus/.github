@@ -30,3 +30,17 @@ different audiences — don't conflate them when editing.
 - The default branch is `main`; changes typically land via PR (see existing merged PRs in history).
 - When updating project links in `profile/README.md`, verify the target repos/sites still exist,
   since these are external references that drift over time.
+
+## Running `gh` in this environment
+
+The maintainer authenticates the GitHub CLI through the 1Password CLI shell plugin. The bare `gh`
+command is an interactive-shell alias (`gh="op plugin run -- gh"`) and is therefore **unauthenticated
+in non-interactive shells** (the alias isn't loaded). To run authenticated GitHub CLI commands —
+including from automation — invoke the wrapper explicitly:
+
+```
+op plugin run -- gh <args>      # e.g. op plugin run -- gh pr create ...
+```
+
+Do not add a `gh` PATH shim for this: `op plugin run -- gh` spawns `gh` as a child process, so a shim
+earlier in `PATH` would recurse infinitely. Always call `op plugin run -- gh` directly instead.
