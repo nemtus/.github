@@ -1,7 +1,8 @@
 {
   "folders": [
     { "path": ".", "name": "org-meta (.github)" },
-    { "path": "../symbol" }
+    { "path": "../symbol" },
+    { "path": "../symbol-product" }
   ],
   "settings": {
     // Watcher excludes: most important here since this does NOT honor .gitignore
