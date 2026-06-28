@@ -39,13 +39,26 @@ Libraries for building Symbol apps, in JavaScript/TypeScript and Python:
 | **@nemtus/symbol-sdk-openapi-generator-typescript-fetch** | Typed REST client generated for Fetch | [npm](https://www.npmjs.com/package/@nemtus/symbol-sdk-openapi-generator-typescript-fetch) ![npm](https://img.shields.io/npm/v/@nemtus/symbol-sdk-openapi-generator-typescript-fetch) · [GitHub](https://github.com/nemtus/symbol-sdk-openapi-generator-typescript-fetch) |
 | **nemtus-symbol-sdk** | Symbol Python SDK (import module: `symbolchain`) | [PyPI](https://pypi.org/project/nemtus-symbol-sdk/) ![PyPI](https://img.shields.io/pypi/v/nemtus-symbol-sdk) · [GitHub](https://github.com/nemtus/symbol/tree/dev/sdk/python) |
 | **nemtus-catparser** | Symbol catbuffer schema parser (Python) | [PyPI](https://pypi.org/project/nemtus-catparser/) ![PyPI](https://img.shields.io/pypi/v/nemtus-catparser) · [GitHub](https://github.com/nemtus/symbol/tree/dev/catbuffer/parser) |
+| **nemtus-symbol-lightapi** | Lightweight Python wrapper for NEM/Symbol REST API calls (import module: `symbollightapi`) | [PyPI](https://pypi.org/project/nemtus-symbol-lightapi/) ![PyPI](https://img.shields.io/pypi/v/nemtus-symbol-lightapi) · [GitHub](https://github.com/nemtus/symbol-product/tree/dev/lightapi/python) |
 
 > ℹ️ `@nemtus/symbol-sdk-typescript` is **deprecated** — please migrate to **@nemtus/symbol-sdk**.
 
 ## 🐳 Run a Symbol node
 
-Reproducible, self-hostable container images of the Symbol node stack (built from canonical
-upstream sources, with SBOM + SLSA provenance):
+The recommended way to set up and run a node is the **shoestring** CLI — it generates the
+configuration, certificates, and compose files for you, so you rarely run the container images
+by hand:
+
+| Package | What it is | Links |
+| --- | --- | --- |
+| **nemtus-symbol-shoestring** | Symbol node deployment & management CLI (import module: `shoestring`; NEMTUS mirror of upstream symbol-shoestring, using NEMTUS mirror images) | [PyPI](https://pypi.org/project/nemtus-symbol-shoestring/) ![PyPI](https://img.shields.io/pypi/v/nemtus-symbol-shoestring) · [GitHub](https://github.com/nemtus/symbol-product/tree/dev/tools/shoestring) |
+
+shoestring deploys nodes using NEMTUS-hosted images defined in the
+**[symbol-networks](https://github.com/nemtus/symbol-networks)** network-config mirror.
+
+Under the hood it pulls these reproducible, self-hostable container images of the Symbol node
+stack (built from canonical upstream sources, with SBOM + SLSA provenance) — also available for
+direct/advanced use:
 
 | Image | What it is | Pull |
 | --- | --- | --- |
