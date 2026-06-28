@@ -2,6 +2,7 @@
   "folders": [
     { "path": ".", "name": "org-meta (.github)" },
     { "path": "../symbol" },
+    { "path": "../symbol-networks" },
     { "path": "../symbol-product" }
   ],
   "settings": {
