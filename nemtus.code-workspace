@@ -3,7 +3,8 @@
     { "path": ".", "name": "org-meta (.github)" },
     { "path": "../symbol" },
     { "path": "../symbol-networks" },
-    { "path": "../symbol-product" }
+    { "path": "../symbol-product" },
+    { "path": "../symbol-rest-api-client" }
   ],
   "settings": {
     // Watcher excludes: most important here since this does NOT honor .gitignore
