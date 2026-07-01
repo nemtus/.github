@@ -42,6 +42,10 @@ Libraries for building Symbol apps, in JavaScript/TypeScript and Python:
 | **nemtus-symbol-lightapi** | Lightweight Python wrapper for NEM/Symbol REST API calls (import module: `symbollightapi`) | [PyPI](https://pypi.org/project/nemtus-symbol-lightapi/) ![PyPI](https://img.shields.io/pypi/v/nemtus-symbol-lightapi) · [GitHub](https://github.com/nemtus/symbol-product/tree/dev/lightapi/python) |
 
 > ℹ️ `@nemtus/symbol-sdk-typescript` is **deprecated** — please migrate to **@nemtus/symbol-sdk**.
+>
+> ℹ️ `@nemtus/symbol-sdk-openapi-generator-typescript-axios` is **deprecated** — please migrate to **@nemtus/symbol-rest-api-client-axios**.
+>
+> ℹ️ `@nemtus/symbol-sdk-openapi-generator-typescript-fetch` is **deprecated** — please migrate to **@nemtus/symbol-rest-api-client-fetch**.
 
 ## 🐳 Run a Symbol node
 
