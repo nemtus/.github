@@ -1,5 +1,6 @@
 {
   "folders": [
+    { "path": "..", "name": "org-root" },
     { "path": ".", "name": "org-meta (.github)" },
     { "path": "../symbol" },
     { "path": "../symbol-networks" },
