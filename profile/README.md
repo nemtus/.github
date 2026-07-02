@@ -75,14 +75,17 @@ Our flagship annual hackathon for builders on Symbol, held every year since 2022
 
 - **Hackathon app** — registration & event management, built on Symbol and actively maintained:
   **[Open app](https://nemtus-hackathon.web.app/)** · [GitHub](https://github.com/nemtus/hackathon)
-- **All editions** — [overview site](https://hackathon.nemtus.com/) ([repo](https://github.com/nemtus/hackathon-lp)):
+- **All editions** — [overview site](https://hackathon.nemtus.com/)
+  ([repo](https://github.com/nemtus/apps/tree/main/apps/hackathon-lp)). The overview and the
+  2023–2026 landing pages now live in the [`nemtus/apps`](https://github.com/nemtus/apps) monorepo
+  and deploy on Cloudflare Workers:
 
   | Edition | Website | Source |
   | --- | --- | --- |
-  | HACK+2026 | [hackathon-2026.nemtus.com](https://hackathon-2026.nemtus.com/) | — |
-  | HACK+2025 | [hackathon-2025.nemtus.com](https://hackathon-2025.nemtus.com/) | [GitHub](https://github.com/nemtus/hackathon-lp-2025) |
-  | HACK+2024 | [hackathon-2024.nemtus.com](https://hackathon-2024.nemtus.com/) | [GitHub](https://github.com/nemtus/hackathon-lp-2024) |
-  | HACK+2023 | [hackathon-2023.nemtus.com](https://hackathon-2023.nemtus.com/) | [GitHub](https://github.com/nemtus/hackathon-lp-2023) |
+  | HACK+2026 | [hackathon-2026.nemtus.com](https://hackathon-2026.nemtus.com/) | [GitHub](https://github.com/nemtus/apps/tree/main/apps/hackathon-lp-2026) |
+  | HACK+2025 | [hackathon-2025.nemtus.com](https://hackathon-2025.nemtus.com/) | [GitHub](https://github.com/nemtus/apps/tree/main/apps/hackathon-lp-2025) |
+  | HACK+2024 | [hackathon-2024.nemtus.com](https://hackathon-2024.nemtus.com/) | [GitHub](https://github.com/nemtus/apps/tree/main/apps/hackathon-lp-2024) |
+  | HACK+2023 | [hackathon-2023.nemtus.com](https://hackathon-2023.nemtus.com/) | [GitHub](https://github.com/nemtus/apps/tree/main/apps/hackathon-lp-2023) |
   | HACK+2022 | [hackathon-2022.nemtus.com](https://hackathon-2022.nemtus.com/) | — |
 
 ## 🎓 Learn Symbol
