@@ -122,9 +122,19 @@ Contributors of every kind are welcome — code, docs, translations, and event h
 ## 💖 Support NEMTUS
 
 NEMTUS is a non-profit; sponsorship directly funds open-source maintenance (SDKs and node images),
-the HACK+ hackathon, and free learning material for the whole Symbol ecosystem.
+the HACK+ hackathon, and free learning material for the whole Symbol ecosystem. Sponsors are
+recognized here and, from higher tiers, on [nemtus.com](https://nemtus.com/) and at our HACK+ /
+XYMPOSIUM events.
 
 **[→ Become a sponsor](https://github.com/sponsors/nemtus)**
+
+### 💛 Our sponsors
+
+Thank you to everyone supporting NEMTUS. Be the first to appear here — [become a sponsor](https://github.com/sponsors/nemtus)!
+
+<!-- sponsors -->
+<!-- Sponsor logos / names are listed here (Bronze tier and above). -->
+<!-- sponsors -->
 
 ---
 
