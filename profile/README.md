@@ -99,8 +99,15 @@ Our flagship annual hackathon for builders on Symbol, held every year since 2022
 
 ## 🌐 Community
 
-- **XYMPOSIUM** — a community conference for the Symbol ecosystem
-  ([GitHub](https://github.com/nemtus/symbol-community-xymposium-2024))
+- **XYMPOSIUM** — a community conference for the Symbol ecosystem. The stable entry point and
+  the per-year sites live in the [`nemtus/apps`](https://github.com/nemtus/apps) monorepo and
+  deploy on Cloudflare Workers:
+
+  | Site | Website | Source |
+  | --- | --- | --- |
+  | XYMPOSIUM (redirects to latest) | [xymposium.nemtus.com](https://xymposium.nemtus.com/) | [GitHub](https://github.com/nemtus/apps/tree/main/apps/xymposium-lp) |
+  | XYMPOSIUM 2025 | [xymposium-2025.nemtus.com](https://xymposium-2025.nemtus.com/) | [GitHub](https://github.com/nemtus/apps/tree/main/apps/xymposium-lp-2025) |
+  | XYMPOSIUM 2024 | [xymposium-2024.nemtus.com](https://xymposium-2024.nemtus.com/) | [GitHub](https://github.com/nemtus/apps/tree/main/apps/xymposium-lp-2024) |
 - Follow along and join in on [X](https://x.com/nemtusofficial) and [Discord](https://discord.gg/eAucJKNs3R)
 
 ## 🤝 Get involved
