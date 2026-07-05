@@ -1,0 +1,12 @@
+[Unit]
+Description=Refresh NEMTUS DR git mirrors (upstream + fork, anonymous HTTPS)
+Wants=network-online.target
+After=network-online.target
+OnFailure=nemtus-notify@%n.service
+
+[Service]
+Type=oneshot
+Nice=10
+ExecStart=%h/.local/bin/nemtus-ops mirror-refresh
+StandardOutput=append:%h/mirrors/logs/refresh.log
+StandardError=append:%h/mirrors/logs/refresh.log
