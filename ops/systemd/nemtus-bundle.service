@@ -1,0 +1,10 @@
+[Unit]
+Description=Weekly full git bundles of NEMTUS DR mirrors (12 generations kept)
+OnFailure=nemtus-notify@%n.service
+
+[Service]
+Type=oneshot
+Nice=10
+ExecStart=%h/.local/bin/nemtus-ops bundle
+StandardOutput=append:%h/mirrors/logs/refresh.log
+StandardError=append:%h/mirrors/logs/refresh.log

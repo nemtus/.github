@@ -1,0 +1,75 @@
+# NEMTUS maintainer ops layer
+
+Versioned home of the maintainer-machine tooling that keeps the NEMTUS mirror
+operation healthy: local disaster-recovery mirrors of the upstream Symbol repos,
+weekly bundle snapshots, and a `doctor` that answers "is my DR still alive" in one
+command. Install with:
+
+```bash
+ops/install.sh          # symlink + systemd user timers (idempotent)
+nemtus-ops doctor       # verify everything
+```
+
+## What runs when
+
+| Unit | Schedule | What it does |
+| --- | --- | --- |
+| `nemtus-mirror-refresh.timer` | daily 03:30 (+ random ≤45min, catch-up on boot) | `nemtus-ops mirror-refresh` — fetch upstream + fork into `~/mirrors/git/*.git` |
+| `nemtus-bundle.timer` | Sun 07:15 (+ random ≤30min, catch-up on boot) | `nemtus-ops bundle` — full `git bundle` per mirror into `~/mirrors/bundles/<date>/`, keep 12 |
+| `nemtus-notify@.service` | on failure of the above | append to `~/mirrors/logs/refresh.log` + desktop notification |
+
+Paths default to `~/src/github.com/nemtus` (checkouts) and `~/mirrors` (DR data);
+override with `NEMTUS_SRC` / `NEMTUS_MIRRORS` when invoking `nemtus-ops` manually
+(the systemd units use the defaults).
+
+## The DR mirror model
+
+One bare repo per project (`symbol`, `symbol-networks`, `symbol-product`) with two
+remotes fetched into separate namespaces:
+
+- `refs/upstream/heads/*`, `refs/upstream/tags/*` ← `github.com/symbol/<project>`
+- `refs/fork/heads/*`, `refs/fork/tags/*` ← `github.com/nemtus/<project>`
+
+Properties that matter for disaster recovery:
+
+- **Anonymous HTTPS** — refresh never depends on 1Password / SSH-agent / token state.
+- **Append-biased** — `fetch.prune=false` (upstream deleting a branch does not delete
+  our copy) and reflogs kept 180 days (`core.logAllRefUpdates=always`), so an
+  upstream force-push leaves the old tip in the reflog = tamper evidence.
+- **Bundles are full snapshots** — each `<date>/<project>.bundle` contains *all* refs
+  (upstream + fork). Restore drill:
+
+```bash
+git clone ~/mirrors/bundles/<date>/symbol.bundle restored-symbol
+git -C restored-symbol ls-remote origin   # shows refs/upstream/* and refs/fork/*
+```
+
+`~/mirrors/images/` holds `docker save` tarballs of the two `ghcr.io/nemtus` images
+pinned by `symbol-networks/.github/network-config/versions.env`; `mirror-refresh`
+warns (with the exact commands) when a pinned version has no tarball yet.
+
+## nemtus-ops subcommands
+
+- `status-all [--fetch] [--prs]` — one line per checkout: branch, dirty count,
+  ahead/behind origin, ahead/behind the mirrored upstream ref, fetch age.
+- `sync-local` — fast-forward-only update of every clean checkout (skips dirty ones);
+  also fast-forwards the default branch when a feature branch is checked out.
+- `mirror-refresh` / `bundle` — the timer payloads (bootstrap the mirrors on first run).
+- `verify-parity` — runs each mirror repo's rename/invariant gate in a throwaway
+  `git worktree` (never touches your working tree): `apply-nemtus-patch.sh` (symbol),
+  `apply-nemtus-networks-patch.sh` (symbol-networks),
+  `check-nemtus-mirror-invariants.sh` (symbol-product).
+- `doctor` — identity, credential helper, GH_TOKEN validity/expiry, upstream
+  `pushurl=DISABLED`, timers active, `git maintenance` registered, mirror freshness
+  (<48h), newest bundle (<8d), disk space.
+
+## Notes / caveats
+
+- `git maintenance` prefetch (configured separately on the checkouts) fetches all
+  remotes into `refs/prefetch/*` — visible `upstream/*` refs still update only on an
+  explicit `git fetch upstream`. Don't be surprised by "instant" fetches.
+- gh / git-push auth on this machine is `GH_TOKEN` sourced from 1Password by
+  `~/.config/shell/gh-token.sh` (see the workspace `CLAUDE.md`). The DR units do NOT
+  need it — that is deliberate.
+- To stop a timer permanently: `systemctl --user disable --now <timer>` and remove
+  the unit files; re-running `install.sh` reinstalls them.

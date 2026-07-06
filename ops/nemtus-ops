@@ -1,0 +1,344 @@
+#!/usr/bin/env bash
+# nemtus-ops — maintainer operations helper for the NEMTUS org checkouts.
+#
+# Subcommands:
+#   status-all [--fetch] [--prs]  one line per repo: branch / dirty / ahead-behind
+#   sync-local                    ff-only update of clean repos (+ default branches)
+#   mirror-refresh                fetch upstream+fork into the bare DR mirrors
+#   bundle                        weekly full bundles of the DR mirrors (12 kept)
+#   verify-parity                 run each mirror repo's rename/invariant gate locally
+#   doctor                        health check of the whole local ops setup
+#
+# Paths (override via env):
+#   NEMTUS_SRC      org checkout root   (default: ~/src/github.com/nemtus)
+#   NEMTUS_MIRRORS  DR mirror root      (default: ~/mirrors)
+#
+# Design notes: DR mirrors fetch over anonymous HTTPS (public repos) so refresh
+# never depends on 1Password / SSH agent state. Mirrors are append-biased:
+# fetch.prune=false, reflogs kept 180 days (upstream force-push leaves the old
+# tip in the reflog = tamper evidence). See ops/README.md.
+
+set -euo pipefail
+
+NEMTUS_SRC="${NEMTUS_SRC:-$HOME/src/github.com/nemtus}"
+NEMTUS_MIRRORS="${NEMTUS_MIRRORS:-$HOME/mirrors}"
+
+REPOS=(symbol symbol-networks symbol-product symbol-rest-api-client apps hackathon symbol-fest-market .github)
+
+# Mirror forks: local dir -> upstream GitHub project
+declare -A UPSTREAM_PROJECT=(
+  [symbol]=symbol/symbol
+  [symbol-networks]=symbol/networks
+  [symbol-product]=symbol/product
+)
+# Mirror forks: local default branch -> upstream ref it mirrors
+declare -A UPSTREAM_REF=(
+  [symbol]=upstream/dev
+  [symbol-networks]=upstream/mainnet
+  [symbol-product]=upstream/dev
+)
+MIRROR_PROJECTS=(symbol symbol-networks symbol-product)
+
+VERSIONS_ENV="$NEMTUS_SRC/symbol-networks/.github/network-config/versions.env"
+
+c_red=""; c_yellow=""; c_green=""; c_reset=""
+if [ -t 1 ]; then
+  c_red=$'\033[31m'; c_yellow=$'\033[33m'; c_green=$'\033[32m'; c_reset=$'\033[0m'
+fi
+
+log() { printf '%s %s\n' "$(date -Is)" "$*"; }
+die() { printf '%serror:%s %s\n' "$c_red" "$c_reset" "$*" >&2; exit 1; }
+
+repo_dir() { printf '%s/%s' "$NEMTUS_SRC" "$1"; }
+
+# ---------------------------------------------------------------------------
+# status-all
+# ---------------------------------------------------------------------------
+cmd_status_all() {
+  local do_fetch=0 do_prs=0
+  for a in "$@"; do
+    case "$a" in
+      --fetch) do_fetch=1 ;;
+      --prs) do_prs=1 ;;
+      *) die "unknown flag for status-all: $a" ;;
+    esac
+  done
+  printf '%-24s %-38s %6s %12s %14s %s\n' REPO BRANCH DIRTY 'ORIGIN +/-' 'UPSTREAM +/-' FETCH-AGE
+  for r in "${REPOS[@]}"; do
+    local d; d="$(repo_dir "$r")"
+    [ -d "$d/.git" ] || { printf '%-24s (missing)\n' "$r"; continue; }
+    if [ "$do_fetch" = 1 ]; then git -C "$d" fetch --all --prune --quiet || true; fi
+    local branch dirty ob="-" ub="-" age="-"
+    branch="$(git -C "$d" branch --show-current 2>/dev/null || echo '(detached)')"
+    dirty="$(git -C "$d" status --porcelain 2>/dev/null | wc -l)"
+    if git -C "$d" rev-parse --abbrev-ref '@{upstream}' >/dev/null 2>&1; then
+      ob="$(git -C "$d" rev-list --left-right --count 'HEAD...@{upstream}' 2>/dev/null | awk '{print "+"$1"/-"$2}')"
+    fi
+    if [ -n "${UPSTREAM_REF[$r]:-}" ] && git -C "$d" rev-parse --verify -q "${UPSTREAM_REF[$r]}" >/dev/null; then
+      ub="$(git -C "$d" rev-list --left-right --count "HEAD...${UPSTREAM_REF[$r]}" 2>/dev/null | awk '{print "+"$1"/-"$2}')"
+    fi
+    if [ -f "$d/.git/FETCH_HEAD" ]; then
+      age="$(( ( $(date +%s) - $(stat -c %Y "$d/.git/FETCH_HEAD") ) / 3600 ))h"
+    fi
+    printf '%-24s %-38s %6s %12s %14s %s\n' "$r" "$branch" "$dirty" "$ob" "$ub" "$age"
+    if [ "$do_prs" = 1 ] && [ -n "${UPSTREAM_PROJECT[$r]:-}" ]; then
+      gh pr list --repo "nemtus/$r" --state open --json number,title,headRefName \
+        --jq '.[] | "    PR #\(.number) [\(.headRefName)] \(.title)"' 2>/dev/null \
+        || printf '    (gh unavailable)\n'
+    fi
+  done
+}
+
+# ---------------------------------------------------------------------------
+# sync-local
+# ---------------------------------------------------------------------------
+cmd_sync_local() {
+  for r in "${REPOS[@]}"; do
+    local d; d="$(repo_dir "$r")"
+    [ -d "$d/.git" ] || continue
+    if [ -n "$(git -C "$d" status --porcelain)" ]; then
+      printf '%-24s %sSKIP%s (dirty working tree)\n' "$r" "$c_yellow" "$c_reset"
+      continue
+    fi
+    git -C "$d" fetch origin --prune --quiet || { printf '%-24s %sFETCH FAILED%s\n' "$r" "$c_red" "$c_reset"; continue; }
+    git -C "$d" remote get-url upstream >/dev/null 2>&1 && git -C "$d" fetch upstream --quiet || true
+    local action="up-to-date"
+    if git -C "$d" rev-parse --abbrev-ref '@{upstream}' >/dev/null 2>&1; then
+      local behind; behind="$(git -C "$d" rev-list --count 'HEAD..@{upstream}' 2>/dev/null || echo 0)"
+      if [ "$behind" -gt 0 ]; then
+        git -C "$d" pull --ff-only --quiet && action="fast-forwarded $behind" || action="${c_red}DIVERGED (manual)${c_reset}"
+      fi
+    fi
+    # Fast-forward the default branch too when something else is checked out.
+    local def=""; def="$(git -C "$d" symbolic-ref --short refs/remotes/origin/HEAD 2>/dev/null | sed 's|^origin/||')" || true
+    local cur; cur="$(git -C "$d" branch --show-current)"
+    if [ -n "$def" ] && [ "$def" != "$cur" ] && git -C "$d" show-ref --verify -q "refs/heads/$def"; then
+      git -C "$d" fetch origin --quiet "$def:$def" 2>/dev/null && action="$action; $def ff'd" || true
+    fi
+    printf '%-24s %s\n' "$r" "$action"
+  done
+}
+
+# ---------------------------------------------------------------------------
+# mirror-refresh
+# ---------------------------------------------------------------------------
+ensure_mirror() {
+  local name="$1" upstream_project="$2"
+  local d="$NEMTUS_MIRRORS/git/$name.git"
+  [ -d "$d" ] && return 0
+  log "bootstrapping mirror $name.git"
+  mkdir -p "$d"
+  git init --bare --quiet "$d"
+  git -C "$d" config core.logAllRefUpdates always
+  git -C "$d" config gc.reflogExpire 180.days
+  git -C "$d" config gc.reflogExpireUnreachable 180.days
+  git -C "$d" config fetch.prune false
+  git -C "$d" remote add upstream "https://github.com/$upstream_project.git"
+  git -C "$d" config --replace-all remote.upstream.fetch '+refs/heads/*:refs/upstream/heads/*'
+  git -C "$d" config --add        remote.upstream.fetch '+refs/tags/*:refs/upstream/tags/*'
+  git -C "$d" config remote.upstream.tagOpt --no-tags
+  git -C "$d" remote add fork "https://github.com/nemtus/$name.git"
+  git -C "$d" config --replace-all remote.fork.fetch '+refs/heads/*:refs/fork/heads/*'
+  git -C "$d" config --add        remote.fork.fetch '+refs/tags/*:refs/fork/tags/*'
+  git -C "$d" config remote.fork.tagOpt --no-tags
+}
+
+check_image_tarballs() {
+  [ -f "$VERSIONS_ENV" ] || { log "WARN versions.env not found at $VERSIONS_ENV"; return 0; }
+  # shellcheck disable=SC1090
+  . <(grep -E '^(CATAPULT|REST)_IMAGE_VERSION=' "$VERSIONS_ENV")
+  local missing=0
+  for spec in "catapult-server:${CATAPULT_IMAGE_VERSION:-}" "symbol-rest:${REST_IMAGE_VERSION:-}"; do
+    local img="${spec%%:*}" ver="${spec##*:}"
+    [ -n "$ver" ] || continue
+    if ! ls "$NEMTUS_MIRRORS/images/$img-$ver".tar* >/dev/null 2>&1; then
+      missing=1
+      log "WARN image tarball missing for ghcr.io/nemtus/$img:$ver — to archive it:"
+      log "     docker pull ghcr.io/nemtus/$img:$ver && docker save ghcr.io/nemtus/$img:$ver | zstd > $NEMTUS_MIRRORS/images/$img-$ver.tar.zst"
+    fi
+  done
+  [ "$missing" = 0 ] && log "image tarballs match versions.env pins"
+}
+
+cmd_mirror_refresh() {
+  mkdir -p "$NEMTUS_MIRRORS/git" "$NEMTUS_MIRRORS/logs" "$NEMTUS_MIRRORS/images" "$NEMTUS_MIRRORS/bundles"
+  local rc=0
+  for p in "${MIRROR_PROJECTS[@]}"; do
+    ensure_mirror "$p" "${UPSTREAM_PROJECT[$p]}"
+    local d="$NEMTUS_MIRRORS/git/$p.git"
+    if git -C "$d" remote update >/dev/null 2>&1; then
+      log "refreshed $p.git (upstream + fork)"
+    else
+      log "FAIL refreshing $p.git"
+      rc=1
+    fi
+  done
+  check_image_tarballs
+  return "$rc"
+}
+
+# ---------------------------------------------------------------------------
+# bundle
+# ---------------------------------------------------------------------------
+cmd_bundle() {
+  local day dest
+  day="$(date +%F)"
+  dest="$NEMTUS_MIRRORS/bundles/$day"
+  mkdir -p "$dest"
+  local rc=0
+  for p in "${MIRROR_PROJECTS[@]}"; do
+    local d="$NEMTUS_MIRRORS/git/$p.git"
+    [ -d "$d" ] || { log "SKIP $p (no mirror yet — run mirror-refresh first)"; rc=1; continue; }
+    if git -C "$d" bundle create "$dest/$p.bundle" --all >/dev/null 2>&1 \
+       && git -C "$d" bundle verify "$dest/$p.bundle" >/dev/null 2>&1; then
+      log "bundled $p -> $dest/$p.bundle ($(du -h "$dest/$p.bundle" | cut -f1))"
+    else
+      log "FAIL bundling $p"
+      rc=1
+    fi
+  done
+  # Rotate: keep the newest 12 dated directories.
+  local old
+  old="$(ls -1d "$NEMTUS_MIRRORS"/bundles/*/ 2>/dev/null | sort | head -n -12 || true)"
+  if [ -n "$old" ]; then
+    printf '%s\n' "$old" | while read -r dir; do
+      log "rotating out $(basename "$dir")"
+      rm -rf -- "$dir"
+    done
+  fi
+  return "$rc"
+}
+
+# ---------------------------------------------------------------------------
+# verify-parity
+# ---------------------------------------------------------------------------
+parity_one() {
+  local repo="$1" script="$2"
+  local src wt tmp rc=0
+  src="$(repo_dir "$repo")"
+  [ -f "$src/$script" ] || { printf '%-24s %sSKIP%s (%s not found)\n' "$repo" "$c_yellow" "$c_reset" "$script"; return 0; }
+  tmp="$(mktemp -d)"; wt="$tmp/wt"
+  git -C "$src" worktree add --detach --quiet "$wt" HEAD
+  if ( cd "$wt" && bash "$script" >"$tmp/out.log" 2>&1 ); then
+    if git -C "$wt" diff --quiet && [ -z "$(git -C "$wt" status --porcelain)" ]; then
+      printf '%-24s %sPASS%s\n' "$repo" "$c_green" "$c_reset"
+    else
+      printf '%-24s %sFAIL%s (rename layer drift)\n' "$repo" "$c_red" "$c_reset"
+      git -C "$wt" status --porcelain | sed 's/^/    /'
+      rc=1
+    fi
+  else
+    printf '%-24s %sFAIL%s (script error; tail of output:)\n' "$repo" "$c_red" "$c_reset"
+    tail -5 "$tmp/out.log" | sed 's/^/    /'
+    rc=1
+  fi
+  git -C "$src" worktree remove --force "$wt" >/dev/null 2>&1 || true
+  rm -rf -- "$tmp"
+  return "$rc"
+}
+
+cmd_verify_parity() {
+  local rc=0
+  parity_one symbol          .github/scripts/apply-nemtus-patch.sh          || rc=1
+  parity_one symbol-networks .github/scripts/apply-nemtus-networks-patch.sh || rc=1
+  parity_one symbol-product  .github/scripts/check-nemtus-mirror-invariants.sh || rc=1
+  return "$rc"
+}
+
+# ---------------------------------------------------------------------------
+# doctor
+# ---------------------------------------------------------------------------
+doc_ok()   { printf '  %sok%s    %s\n' "$c_green" "$c_reset" "$*"; }
+doc_warn() { printf '  %sWARN%s  %s\n' "$c_yellow" "$c_reset" "$*"; DOC_WARN=$((DOC_WARN+1)); }
+doc_fail() { printf '  %sFAIL%s  %s\n' "$c_red" "$c_reset" "$*"; DOC_FAIL=$((DOC_FAIL+1)); }
+
+cmd_doctor() {
+  DOC_WARN=0; DOC_FAIL=0
+  echo "identity / credentials"
+  [ -n "$(git config --global user.email 2>/dev/null)" ] \
+    && doc_ok "global git identity set" || doc_fail "global git identity missing (~/.gitconfig)"
+  git config --global --get-all credential.https://github.com.helper 2>/dev/null | grep -q 'gh auth git-credential' \
+    && doc_ok "credential helper -> gh auth git-credential" || doc_fail "credential helper for github.com not configured"
+  if [ -n "${GH_TOKEN:-}" ]; then
+    local code hdrs exp
+    hdrs="$(mktemp)"
+    code="$(curl -s -o /dev/null -D "$hdrs" -w '%{http_code}' -H "Authorization: Bearer $GH_TOKEN" https://api.github.com/user || echo 000)"
+    if [ "$code" = 200 ]; then
+      doc_ok "GH_TOKEN valid (HTTP 200)"
+      exp="$(grep -i '^github-authentication-token-expiration:' "$hdrs" | cut -d' ' -f2- | tr -d '\r' || true)"
+      if [ -n "$exp" ]; then
+        local left=$(( ( $(date -d "$exp" +%s) - $(date +%s) ) / 86400 ))
+        if [ "$left" -lt 14 ]; then doc_warn "token expires in ${left}d ($exp) — rotate in 1Password"; else doc_ok "token expiry ${left}d away"; fi
+      else
+        doc_warn "token has no expiration header — consider a nemtus-scoped fine-grained PAT (90d expiry)"
+      fi
+    else
+      doc_fail "GH_TOKEN rejected by GitHub (HTTP $code) — rotate the 1Password item / unlock 1Password"
+    fi
+    rm -f "$hdrs"
+  else
+    doc_fail "GH_TOKEN empty — 1Password locked? (. ~/.config/shell/gh-token.sh)"
+  fi
+
+  echo "repo safety"
+  for r in "${MIRROR_PROJECTS[@]}"; do
+    local d; d="$(repo_dir "$r")"
+    [ "$(git -C "$d" config --get remote.upstream.pushurl 2>/dev/null)" = "DISABLED" ] \
+      && doc_ok "$r: upstream pushurl DISABLED" || doc_fail "$r: upstream pushurl NOT disabled"
+  done
+
+  echo "automation"
+  for t in nemtus-mirror-refresh.timer nemtus-bundle.timer; do
+    systemctl --user is-active --quiet "$t" 2>/dev/null \
+      && doc_ok "$t active" || doc_fail "$t not active (run ops/install.sh)"
+  done
+  local reg; reg="$(git config --global --get-all maintenance.repo 2>/dev/null | wc -l)"
+  [ "$reg" -ge 3 ] && doc_ok "git maintenance registered ($reg repos)" || doc_warn "git maintenance registered for only $reg repos"
+
+  echo "DR freshness"
+  local now; now="$(date +%s)"
+  for p in "${MIRROR_PROJECTS[@]}"; do
+    local d="$NEMTUS_MIRRORS/git/$p.git"
+    if [ ! -d "$d" ]; then doc_fail "mirror $p.git missing"; continue; fi
+    local newest
+    newest="$(stat -c %Y "$d/FETCH_HEAD" 2>/dev/null || echo 0)"
+    if [ $(( now - newest )) -lt $(( 48 * 3600 )) ]; then
+      doc_ok "mirror $p fresh ($(( (now - newest) / 3600 ))h)"
+    else
+      doc_fail "mirror $p stale (>48h)"
+    fi
+  done
+  local newest_bundle
+  newest_bundle="$(ls -1d "$NEMTUS_MIRRORS"/bundles/*/ 2>/dev/null | sort | tail -1 || true)"
+  if [ -n "$newest_bundle" ]; then
+    local bts; bts="$(date -d "$(basename "$newest_bundle")" +%s 2>/dev/null || echo 0)"
+    [ $(( now - bts )) -lt $(( 8 * 86400 )) ] \
+      && doc_ok "newest bundle $(basename "$newest_bundle")" || doc_warn "newest bundle older than 8 days"
+  else
+    doc_fail "no bundles yet (run: nemtus-ops bundle)"
+  fi
+  local free_g; free_g="$(df --output=avail -BG "$NEMTUS_MIRRORS" 2>/dev/null | tail -1 | tr -dc '0-9')"
+  [ "${free_g:-0}" -ge 5 ] && doc_ok "disk free ${free_g}G" || doc_warn "low disk space: ${free_g}G"
+
+  echo
+  if [ "$DOC_FAIL" -gt 0 ]; then
+    printf '%sdoctor: %d failure(s), %d warning(s)%s\n' "$c_red" "$DOC_FAIL" "$DOC_WARN" "$c_reset"; return 1
+  fi
+  printf '%sdoctor: healthy%s (%d warning(s))\n' "$c_green" "$c_reset" "$DOC_WARN"
+}
+
+# ---------------------------------------------------------------------------
+usage() {
+  sed -n '2,12p' "$0" | sed 's/^# \{0,1\}//'
+}
+
+case "${1:-help}" in
+  status-all)     shift; cmd_status_all "$@" ;;
+  sync-local)     shift; cmd_sync_local "$@" ;;
+  mirror-refresh) shift; cmd_mirror_refresh "$@" ;;
+  bundle)         shift; cmd_bundle "$@" ;;
+  verify-parity)  shift; cmd_verify_parity "$@" ;;
+  doctor)         shift; cmd_doctor "$@" ;;
+  help|--help|-h) usage ;;
+  *) die "unknown subcommand: $1 (try: nemtus-ops help)" ;;
+esac

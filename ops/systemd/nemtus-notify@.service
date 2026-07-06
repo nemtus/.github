@@ -1,0 +1,6 @@
+[Unit]
+Description=Failure notifier for NEMTUS ops units (%i)
+
+[Service]
+Type=oneshot
+ExecStart=/bin/sh -c 'printf "%%s FAILED: %%s\n" "$(date -Is)" "%i" >> "%h/mirrors/logs/refresh.log"; command -v notify-send >/dev/null && notify-send -u critical "NEMTUS ops" "unit %i failed — see ~/mirrors/logs/refresh.log" || true'
