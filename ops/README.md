@@ -53,7 +53,12 @@ warns (with the exact commands) when a pinned version has no tarball yet.
 - `status-all [--fetch] [--prs]` — one line per checkout: branch, dirty count,
   ahead/behind origin, ahead/behind the mirrored upstream ref, fetch age.
 - `sync-local` — fast-forward-only update of every clean checkout (skips dirty ones);
-  also fast-forwards the default branch when a feature branch is checked out.
+  also fast-forwards the default branch when a feature branch is checked out, and
+  pushes the upstream tag archive for `symbol`
+  (`refs/remotes/upstream/tags/* -> refs/upstream/tags/*`). This is the
+  maintainer-lane half of the tamper-alarm design: CI's `upstream-tags` job only
+  VERIFIES, because GITHUB_TOKEN cannot create refs whose trees contain workflow
+  files (see `symbol/RELEASE.md`, "Upstream tag archive").
 - `mirror-refresh` / `bundle` — the timer payloads (bootstrap the mirrors on first run).
 - `verify-parity` — runs each mirror repo's rename/invariant gate in a throwaway
   `git worktree` (never touches your working tree): `apply-nemtus-patch.sh` (symbol),
