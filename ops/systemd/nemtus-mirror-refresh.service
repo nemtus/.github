@@ -7,6 +7,8 @@ OnFailure=nemtus-notify@%n.service
 [Service]
 Type=oneshot
 Nice=10
+# NEMTUS_SRC / NEMTUS_MIRRORS written by ops/install.sh (optional: defaults apply without it).
+EnvironmentFile=-%h/.config/nemtus-ops/env
 ExecStart=%h/.local/bin/nemtus-ops mirror-refresh
 StandardOutput=append:%h/mirrors/logs/refresh.log
 StandardError=append:%h/mirrors/logs/refresh.log
