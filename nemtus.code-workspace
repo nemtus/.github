@@ -5,6 +5,7 @@
     { "path": "../symbol" },
     { "path": "../symbol-networks" },
     { "path": "../symbol-product" },
+    { "path": "../symbol-bootstrap" },
     { "path": "../symbol-rest-api-client" },
     { "path": "../apps", "name": "nemtus-apps" }
   ],

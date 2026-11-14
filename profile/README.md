@@ -71,6 +71,21 @@ direct/advanced use:
 | **ghcr.io/nemtus/catapult-server** | Symbol `catapult-server` node (server, broker, recovery, tools) | `docker pull ghcr.io/nemtus/catapult-server:latest` · [packages](https://github.com/nemtus/symbol/pkgs/container/catapult-server) |
 | **ghcr.io/nemtus/symbol-rest** | Symbol REST gateway (`symbol-api-rest`) | `docker pull ghcr.io/nemtus/symbol-rest:latest` · [packages](https://github.com/nemtus/symbol/pkgs/container/symbol-rest) |
 
+### 🧰 Still on symbol-bootstrap?
+
+**symbol-bootstrap** is the legacy node-setup tool, and new nodes should use shoestring. Upstream
+stopped publishing it to npm at `1.1.10`, so for operators who can't migrate yet, NEMTUS maintains a
+fork that keeps it installable:
+
+| Package | What it is | Links |
+| --- | --- | --- |
+| **@nemtus/symbol-bootstrap** | NEMTUS maintenance fork of `symbol/symbol-bootstrap`: follows upstream, adds Node.js 24 and Docker Compose V2 support plus security patches. It keeps using the upstream `symbolplatform/*` images and presets, with backups at `ghcr.io/nemtus/symbol-bootstrap-images` | [npm](https://www.npmjs.com/package/@nemtus/symbol-bootstrap) ![npm](https://img.shields.io/npm/v/@nemtus/symbol-bootstrap) · [GitHub](https://github.com/nemtus/symbol-bootstrap) |
+
+The CLI command is unchanged — `npm install -g @nemtus/symbol-bootstrap`, then run
+`symbol-bootstrap` as before. See
+[what differs from upstream](https://github.com/nemtus/symbol-bootstrap/blob/dev/docs/nemtus-fork.md).
+It is maintained for as long as operators need it; please plan your move to shoestring.
+
 ### 🛠️ Rather not run it yourself? — Stir Hosyu Symbol
 
 NEMTUS has taken over **Stir Hosyu Symbol**, a managed node maintenance service, and now
