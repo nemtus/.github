@@ -6,8 +6,9 @@ weekly bundle snapshots, and a `doctor` that answers "is my DR still alive" in o
 command. Install with:
 
 ```bash
-ops/install.sh          # symlink + systemd user timers (idempotent)
-nemtus-ops doctor       # verify everything
+ops/install.sh            # symlink + systemd user timers (idempotent)
+nemtus-ops setup-remotes  # fetch-only upstream remotes on the fork checkouts
+nemtus-ops doctor         # verify everything
 ```
 
 ## What runs when
@@ -71,6 +72,9 @@ Docker images; their copies are kept by CI (`image-backup.yml` in that repo →
   maintainer-lane half of the tamper-alarm design: CI's `upstream-tags` job only
   VERIFIES, because GITHUB_TOKEN cannot create refs whose trees contain workflow
   files (see `symbol/RELEASE.md`, "Upstream tag archive").
+- `setup-remotes` — idempotently gives each fork checkout a fetch-only `upstream` remote
+  (`pushurl=DISABLED`; for `symbol` also upstream tags into `refs/remotes/upstream/tags/*`,
+  the source `sync-local` archives). Run once on a new machine, after cloning.
 - `mirror-refresh` / `bundle` — the timer payloads (bootstrap the mirrors on first run).
 - `verify-parity` — runs each mirror repo's rename/invariant gate in a throwaway
   `git worktree` (never touches your working tree): `apply-nemtus-patch.sh` (symbol),
