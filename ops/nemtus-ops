@@ -4,6 +4,7 @@
 # Subcommands:
 #   status-all [--fetch] [--prs]  one line per repo: branch / dirty / ahead-behind
 #   sync-local                    ff-only update of clean repos (+ default branches)
+#   setup-remotes                 add/repair the fetch-only `upstream` remote of each fork
 #   mirror-refresh                fetch upstream+fork into the bare DR mirrors
 #   bundle                        weekly full bundles of the DR mirrors (12 kept)
 #   verify-parity                 run each mirror repo's rename/invariant gate locally
@@ -157,6 +158,37 @@ cmd_sync_local() {
       printf '%-24s skipped (GH_TOKEN empty — unlock 1Password)\n' "symbol(tag-archive)"
     fi
   fi
+}
+
+# ---------------------------------------------------------------------------
+# setup-remotes
+# ---------------------------------------------------------------------------
+# Idempotent: every fork checkout gets a fetch-only `upstream` remote
+# (pushurl=DISABLED, checked by doctor). For symbol, upstream tags are fetched into
+# refs/remotes/upstream/tags/* (not the local tag namespace) — the source that
+# sync-local archives to the fork's refs/upstream/tags/* (see symbol/RELEASE.md).
+cmd_setup_remotes() {
+  for r in "${MIRROR_PROJECTS[@]}"; do
+    local d; d="$(repo_dir "$r")"
+    [ -d "$d/.git" ] || { printf '%-24s %sSKIP%s (no checkout)\n' "$r" "$c_yellow" "$c_reset"; continue; }
+    local url="https://github.com/${UPSTREAM_PROJECT[$r]}.git"
+    if git -C "$d" remote get-url upstream >/dev/null 2>&1; then
+      git -C "$d" remote set-url upstream "$url"
+    else
+      git -C "$d" remote add upstream "$url"
+    fi
+    git -C "$d" config --replace-all remote.upstream.fetch '+refs/heads/*:refs/remotes/upstream/*'
+    if [ "$r" = symbol ]; then
+      git -C "$d" config --add remote.upstream.fetch '+refs/tags/*:refs/remotes/upstream/tags/*'
+      git -C "$d" config remote.upstream.tagOpt --no-tags
+    fi
+    git -C "$d" config remote.upstream.pushurl DISABLED
+    if git -C "$d" fetch --quiet --no-recurse-submodules upstream; then
+      printf '%-24s %sok%s upstream=%s (push DISABLED)\n' "$r" "$c_green" "$c_reset" "$url"
+    else
+      printf '%-24s %sFETCH FAILED%s %s\n' "$r" "$c_red" "$c_reset" "$url"
+    fi
+  done
 }
 
 # ---------------------------------------------------------------------------
@@ -330,7 +362,7 @@ cmd_doctor() {
   for r in "${MIRROR_PROJECTS[@]}"; do
     local d; d="$(repo_dir "$r")"
     [ "$(git -C "$d" config --get remote.upstream.pushurl 2>/dev/null)" = "DISABLED" ] \
-      && doc_ok "$r: upstream pushurl DISABLED" || doc_fail "$r: upstream pushurl NOT disabled"
+      && doc_ok "$r: upstream pushurl DISABLED" || doc_fail "$r: upstream pushurl NOT disabled (run: nemtus-ops setup-remotes)"
   done
 
   echo "automation"
@@ -338,7 +370,8 @@ cmd_doctor() {
     systemctl --user is-active --quiet "$t" 2>/dev/null \
       && doc_ok "$t active" || doc_fail "$t not active (run ops/install.sh)"
   done
-  local reg; reg="$(git config --global --get-all maintenance.repo 2>/dev/null | wc -l)"
+  # `git config --get-all` exits 1 when the key is unset; under `set -o pipefail` that would abort doctor.
+  local reg; reg="$( { git config --global --get-all maintenance.repo 2>/dev/null || true; } | wc -l)"
   [ "$reg" -ge 3 ] && doc_ok "git maintenance registered ($reg repos)" || doc_warn "git maintenance registered for only $reg repos"
 
   echo "DR freshness"
@@ -368,7 +401,9 @@ cmd_doctor() {
   sdd="$(repo_dir symbol)"
   arch_local="$(git -C "$sdd" for-each-ref 'refs/remotes/upstream/tags' 2>/dev/null | wc -l)"
   arch_fork="$(git -C "$sdd" ls-remote origin 'refs/upstream/tags/*' 2>/dev/null | grep -cv '\^{}$' || true)"
-  if [ "${arch_local:-0}" -gt 0 ] && [ "${arch_fork:-0}" -ge "${arch_local:-0}" ]; then
+  if [ "${arch_local:-0}" -eq 0 ]; then
+    doc_warn "local symbol checkout has no refs/remotes/upstream/tags (fork archive: ${arch_fork:-0} refs) — run: nemtus-ops setup-remotes"
+  elif [ "${arch_fork:-0}" -ge "${arch_local:-0}" ]; then
     doc_ok "fork tag archive current (${arch_fork} refs)"
   else
     doc_warn "fork tag archive behind (fork ${arch_fork:-0} < local ${arch_local:-0}) — run: nemtus-ops sync-local"
@@ -385,12 +420,13 @@ cmd_doctor() {
 
 # ---------------------------------------------------------------------------
 usage() {
-  sed -n '2,15p' "$(readlink -f "$0")" | sed 's/^# \{0,1\}//'
+  sed -n '2,16p' "$(readlink -f "$0")" | sed 's/^# \{0,1\}//'
 }
 
 case "${1:-help}" in
   status-all)     shift; cmd_status_all "$@" ;;
   sync-local)     shift; cmd_sync_local "$@" ;;
+  setup-remotes)  shift; cmd_setup_remotes "$@" ;;
   mirror-refresh) shift; cmd_mirror_refresh "$@" ;;
   bundle)         shift; cmd_bundle "$@" ;;
   verify-parity)  shift; cmd_verify_parity "$@" ;;
