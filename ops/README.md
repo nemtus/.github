@@ -24,7 +24,7 @@ override with `NEMTUS_SRC` / `NEMTUS_MIRRORS` when invoking `nemtus-ops` manuall
 
 ## The DR mirror model
 
-One bare repo per project (`symbol`, `symbol-networks`, `symbol-product`) with two
+One bare repo per project (`symbol`, `symbol-networks`, `symbol-product`, `symbol-bootstrap`) with two
 remotes fetched into separate namespaces:
 
 - `refs/upstream/heads/*`, `refs/upstream/tags/*` ← `github.com/symbol/<project>`
@@ -48,6 +48,10 @@ git -C restored-symbol ls-remote origin   # shows refs/upstream/* and refs/fork/
 pinned by `symbol-networks/.github/network-config/versions.env`; `mirror-refresh`
 warns (with the exact commands) when a pinned version has no tarball yet.
 
+`symbol-bootstrap` is a maintenance fork that keeps using the upstream `symbolplatform/*`
+Docker images; their copies are kept by CI (`image-backup.yml` in that repo →
+`ghcr.io/nemtus/symbol-bootstrap-images/*`), not as local tarballs.
+
 ## nemtus-ops subcommands
 
 - `status-all [--fetch] [--prs]` — one line per checkout: branch, dirty count,
@@ -63,7 +67,7 @@ warns (with the exact commands) when a pinned version has no tarball yet.
 - `verify-parity` — runs each mirror repo's rename/invariant gate in a throwaway
   `git worktree` (never touches your working tree): `apply-nemtus-patch.sh` (symbol),
   `apply-nemtus-networks-patch.sh` (symbol-networks),
-  `check-nemtus-mirror-invariants.sh` (symbol-product).
+  `check-nemtus-mirror-invariants.sh` (symbol-product, symbol-bootstrap).
 - `doctor` — identity, credential helper, GH_TOKEN validity/expiry, upstream
   `pushurl=DISABLED`, timers active, `git maintenance` registered, mirror freshness
   (<48h), newest bundle (<8d), disk space.
