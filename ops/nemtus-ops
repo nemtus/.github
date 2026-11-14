@@ -23,21 +23,23 @@ set -euo pipefail
 NEMTUS_SRC="${NEMTUS_SRC:-$HOME/src/github.com/nemtus}"
 NEMTUS_MIRRORS="${NEMTUS_MIRRORS:-$HOME/mirrors}"
 
-REPOS=(symbol symbol-networks symbol-product symbol-rest-api-client apps hackathon symbol-fest-market .github)
+REPOS=(symbol symbol-networks symbol-product symbol-bootstrap symbol-rest-api-client apps hackathon symbol-fest-market .github)
 
 # Mirror forks: local dir -> upstream GitHub project
 declare -A UPSTREAM_PROJECT=(
   [symbol]=symbol/symbol
   [symbol-networks]=symbol/networks
   [symbol-product]=symbol/product
+  [symbol-bootstrap]=symbol/symbol-bootstrap
 )
 # Mirror forks: local default branch -> upstream ref it mirrors
 declare -A UPSTREAM_REF=(
   [symbol]=upstream/dev
   [symbol-networks]=upstream/mainnet
   [symbol-product]=upstream/dev
+  [symbol-bootstrap]=upstream/dev
 )
-MIRROR_PROJECTS=(symbol symbol-networks symbol-product)
+MIRROR_PROJECTS=(symbol symbol-networks symbol-product symbol-bootstrap)
 
 VERSIONS_ENV="$NEMTUS_SRC/symbol-networks/.github/network-config/versions.env"
 
@@ -267,6 +269,7 @@ cmd_verify_parity() {
   parity_one symbol          .github/scripts/apply-nemtus-patch.sh          || rc=1
   parity_one symbol-networks .github/scripts/apply-nemtus-networks-patch.sh || rc=1
   parity_one symbol-product  .github/scripts/check-nemtus-mirror-invariants.sh || rc=1
+  parity_one symbol-bootstrap .github/scripts/check-nemtus-mirror-invariants.sh || rc=1
   return "$rc"
 }
 
