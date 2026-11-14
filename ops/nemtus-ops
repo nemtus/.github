@@ -9,8 +9,9 @@
 #   verify-parity                 run each mirror repo's rename/invariant gate locally
 #   doctor                        health check of the whole local ops setup
 #
-# Paths (override via env):
-#   NEMTUS_SRC      org checkout root   (default: ~/src/github.com/nemtus)
+# Paths, in order of precedence: the environment, then ~/.config/nemtus-ops/env (written by
+# install.sh, also read by the systemd units), then the defaults below:
+#   NEMTUS_SRC      org checkout root   (default: the directory holding this .github checkout)
 #   NEMTUS_MIRRORS  DR mirror root      (default: ~/mirrors)
 #
 # Design notes: DR mirrors fetch over anonymous HTTPS (public repos) so refresh
@@ -20,7 +21,19 @@
 
 set -euo pipefail
 
-NEMTUS_SRC="${NEMTUS_SRC:-$HOME/src/github.com/nemtus}"
+NEMTUS_OPS_CONFIG="${XDG_CONFIG_HOME:-$HOME/.config}/nemtus-ops/env"
+# Values already in the environment win over the config file.
+_env_src="${NEMTUS_SRC:-}" _env_mirrors="${NEMTUS_MIRRORS:-}"
+if [ -f "$NEMTUS_OPS_CONFIG" ]; then
+  # shellcheck disable=SC1090
+  . "$NEMTUS_OPS_CONFIG"
+fi
+[ -n "$_env_src" ] && NEMTUS_SRC="$_env_src"
+[ -n "$_env_mirrors" ] && NEMTUS_MIRRORS="$_env_mirrors"
+# Default checkout root: this script lives in <root>/.github/ops (reached through the
+# ~/.local/bin symlink), so the org checkouts are two levels above its real location.
+_self="$(readlink -f "${BASH_SOURCE[0]}")"
+NEMTUS_SRC="${NEMTUS_SRC:-$(cd "$(dirname "$_self")/../.." && pwd)}"
 NEMTUS_MIRRORS="${NEMTUS_MIRRORS:-$HOME/mirrors}"
 
 REPOS=(symbol symbol-networks symbol-product symbol-bootstrap symbol-rest-api-client apps hackathon symbol-fest-market .github)
@@ -282,6 +295,11 @@ doc_fail() { printf '  %sFAIL%s  %s\n' "$c_red" "$c_reset" "$*"; DOC_FAIL=$((DOC
 
 cmd_doctor() {
   DOC_WARN=0; DOC_FAIL=0
+  echo "paths"
+  [ -d "$NEMTUS_SRC/.github/.git" ] \
+    && doc_ok "NEMTUS_SRC=$NEMTUS_SRC" || doc_fail "NEMTUS_SRC=$NEMTUS_SRC has no .github checkout (set it in $NEMTUS_OPS_CONFIG)"
+  [ -f "$NEMTUS_OPS_CONFIG" ] \
+    && doc_ok "config $NEMTUS_OPS_CONFIG" || doc_warn "no $NEMTUS_OPS_CONFIG — systemd units use the defaults (re-run ops/install.sh)"
   echo "identity / credentials"
   [ -n "$(git config --global user.email 2>/dev/null)" ] \
     && doc_ok "global git identity set" || doc_fail "global git identity missing (~/.gitconfig)"
@@ -367,7 +385,7 @@ cmd_doctor() {
 
 # ---------------------------------------------------------------------------
 usage() {
-  sed -n '2,12p' "$0" | sed 's/^# \{0,1\}//'
+  sed -n '2,15p' "$(readlink -f "$0")" | sed 's/^# \{0,1\}//'
 }
 
 case "${1:-help}" in

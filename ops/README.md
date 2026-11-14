@@ -18,9 +18,17 @@ nemtus-ops doctor       # verify everything
 | `nemtus-bundle.timer` | Sun 07:15 (+ random ≤30min, catch-up on boot) | `nemtus-ops bundle` — full `git bundle` per mirror into `~/mirrors/bundles/<date>/`, keep 12 |
 | `nemtus-notify@.service` | on failure of the above | append to `~/mirrors/logs/refresh.log` + desktop notification |
 
-Paths default to `~/src/github.com/nemtus` (checkouts) and `~/mirrors` (DR data);
-override with `NEMTUS_SRC` / `NEMTUS_MIRRORS` when invoking `nemtus-ops` manually
-(the systemd units use the defaults).
+Paths: `NEMTUS_SRC` (org checkouts) defaults to the directory that holds this `.github`
+checkout — wherever it is, e.g. `~/src/github/nemtus` — and `NEMTUS_MIRRORS` (DR data) to
+`~/mirrors`. `install.sh` writes both to `~/.config/nemtus-ops/env`, which the systemd units
+load (`EnvironmentFile`) and `nemtus-ops` reads for manual runs; a value set in the
+environment still wins. To change them, re-run `install.sh` with the variables set
+(`NEMTUS_SRC=… NEMTUS_MIRRORS=… ops/install.sh`). Unit logs always go to
+`~/mirrors/logs/refresh.log`.
+
+On WSL / machines without lingering, the timers only run while a user session is up;
+`Persistent=true` catches up missed runs at the next login (`loginctl enable-linger` makes
+them run without a login, if your system allows it).
 
 ## The DR mirror model
 
