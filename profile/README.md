@@ -8,7 +8,9 @@
 
 NEMTUS is a Japanese non-profit advancing the **NEM/Symbol** blockchain — we build and maintain
 open-source SDKs and node images, run the annual HACK+ hackathon, and publish learning material
-so anyone can build on Symbol. Everything we make is open source and free to use.
+so anyone can build on Symbol. Everything we make is open source and free to use. We also
+operate **[Stir Hosyu Symbol](https://stir-hosyu.nemtus.com/)**, a managed Symbol node
+maintenance service.
 
 [![Sponsor](https://img.shields.io/badge/Sponsor-NEMTUS-ea4aaa?logo=githubsponsors)](https://github.com/sponsors/nemtus)
 [![Website](https://img.shields.io/badge/Website-nemtus.com-2ea44f)](https://nemtus.com/)
@@ -68,6 +70,22 @@ direct/advanced use:
 | --- | --- | --- |
 | **ghcr.io/nemtus/catapult-server** | Symbol `catapult-server` node (server, broker, recovery, tools) | `docker pull ghcr.io/nemtus/catapult-server:latest` · [packages](https://github.com/nemtus/symbol/pkgs/container/catapult-server) |
 | **ghcr.io/nemtus/symbol-rest** | Symbol REST gateway (`symbol-api-rest`) | `docker pull ghcr.io/nemtus/symbol-rest:latest` · [packages](https://github.com/nemtus/symbol/pkgs/container/symbol-rest) |
+
+### 🛠️ Rather not run it yourself? — Stir Hosyu Symbol
+
+NEMTUS has taken over **Stir Hosyu Symbol**, a managed node maintenance service, and now
+operates it. We build, run, monitor, and update a Symbol node on your behalf:
+
+- 🔑 **Your private keys stay with you** — the node is set up for delegated harvesting only, so
+  we never hold your keys
+- 💰 **Rewards go to your address** — harvesting and beneficiary rewards are paid to an address
+  you choose
+- 🧭 **No server knowledge needed** — whenever something needs your action, we tell you exactly
+  what to do and when
+- 🆓 **No setup fee** — annual plans only
+
+**[Learn more and apply → stir-hosyu.nemtus.com](https://stir-hosyu.nemtus.com/)** (Japanese) ·
+[source](https://github.com/nemtus/apps/tree/main/apps/stir-hosyu-lp)
 
 ## 🏆 NEMTUS Hackathon — HACK+
 
