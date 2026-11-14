@@ -55,7 +55,7 @@ by hand:
 
 | Package | What it is | Links |
 | --- | --- | --- |
-| **nemtus-symbol-shoestring** | Symbol node deployment & management CLI (import module: `shoestring`; NEMTUS mirror of upstream symbol-shoestring, using NEMTUS mirror images) | [PyPI](https://pypi.org/project/nemtus-symbol-shoestring/) ![PyPI](https://img.shields.io/pypi/v/nemtus-symbol-shoestring) · [GitHub](https://github.com/nemtus/symbol-product/tree/dev/tools/shoestring) |
+| **nemtus-symbol-shoestring** | Symbol node deployment & management CLI (import module: `shoestring`; NEMTUS mirror of upstream symbol-shoestring, using NEMTUS mirror images) | [PyPI](https://pypi.org/project/nemtus-symbol-shoestring/) ![PyPI](https://img.shields.io/pypi/v/nemtus-symbol-shoestring?label=pypi) · [GitHub](https://github.com/nemtus/symbol-product/tree/dev/tools/shoestring) |
 
 shoestring deploys nodes using NEMTUS-hosted images defined in the
 **[symbol-networks](https://github.com/nemtus/symbol-networks)** network-config mirror.
